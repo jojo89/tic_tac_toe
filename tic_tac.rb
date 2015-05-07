@@ -1,5 +1,5 @@
 require 'pry'
-class Game
+class Grid
   attr_accessor :grid, :turn, :finished, :piece, :square_count, :squares_occupied
 
   def initialize(piece, grid_size)
@@ -64,11 +64,11 @@ class Game
       self.finished = true
       puts 2
     end
-    if x != 0 && grid[y] && grid[y] && (grid[y][x - 1] == character && grid[y][x - 2] == character)
+    if x - 2 >= 0 && grid[y] && grid[y] && (grid[y][x - 1] == character && grid[y][x - 2] == character)
       self.finished = true
       puts 3
     end
-    if y != 0 && grid[y - 1] && grid[y - 2] && (grid[y - 1][x] == character && grid[y - 2][x] == character)
+    if y - 2 >= 0 && grid[y - 1] && grid[y - 2] && (grid[y - 1][x] == character && grid[y - 2][x] == character)
       self.finished = true
       puts 4
     end
@@ -76,15 +76,15 @@ class Game
        self.finished = true
        puts 5
     end
-    if x != 0 && grid[y + 1] && grid[y + 2] && (grid[y + 1][x - 1] == character && grid[y + 2][x - 2] == character)
+    if x - 2 >= 0 && grid[y + 1] && grid[y + 2] && (grid[y + 1][x - 1] == character && grid[y + 2][x - 2] == character)
       self.finished = true
       puts 6
     end
-    if y != 0 && grid[y - 1] && grid[y - 2] && (grid[y - 1][x + 1] == character && grid[y - 2][x + 2] == character)
+    if y - 2 >= 0 && x - 2 >= 0 && grid[y - 1] && grid[y - 2] && (grid[y - 1][x + 1] == character && grid[y - 2][x + 2] == character)
       self.finished = true
       puts 7
     end
-    if y != 0 && x != 0 && grid[y - 1] && grid[y - 2] && (grid[y - 1][x - 1] == character && grid[y - 2][x - 2] == character)
+    if y - 2 >= 0 && x -2 >= 0 && grid[y - 1] && grid[y - 2] && (grid[y - 1][x - 1] == character && grid[y - 2][x - 2] == character)
       self.finished = true
       puts 8
     end
@@ -112,23 +112,23 @@ until grid_size.to_i > 2
   grid_size = gets.chomp
 end
 
-game = Game.new(piece, grid_size.to_i)
+grid = Grid.new(piece, grid_size.to_i)
 x = 0
 y = 0
 
-until game.finished?
-  if game.piece == game.character
+until grid.finished?
+  if grid.piece == grid.character
     until x.to_i.between?(1, grid_size.to_i) && y.to_i.between?(1, grid_size.to_i)
       puts "enter the cordinate of the x axis you would like to place your spot."
       x = gets.chomp.to_i
       puts "enter the cordinate of the y axis you would like to place your spot."
       y = gets.chomp.to_i
     end
-    game.mark_board(x, y)
+    grid.mark_board(x, y)
   else
     x = rand(1..grid_size.to_i)
     y = rand(1..grid_size.to_i)
-    game.mark_board(x, y)
+    grid.mark_board(x, y)
   end
     x=0
     y=0
