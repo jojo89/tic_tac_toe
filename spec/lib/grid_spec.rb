@@ -1,42 +1,76 @@
 require 'spec_helper.rb'
 
-describe Grid do
-  subject { Grid.new(3) }
-  let(:ex) { cell = Cell.new; cell.mark_ex ; cell}
-  let(:oh) { cell = Cell.new; cell.mark_oh ; cell}
-    let(:grid) {
-      [
-        [Cell.new, Cell.new, oh],
-        [Cell.new, oh, ex],
-        [oh, ex, ex],
-      ]  
-   }
+RSpec.shared_examples "completed_board" do
+  subject { described_class.new(3) }
+  let(:ex) { cell = Cell.new; cell.mark("|x|") ; cell}
+  let(:oh) { cell = Cell.new; cell.mark("|o|") ; cell}
 
-    before do
-      allow(subject).to receive(:grid).and_return(grid)
-    end
+  before do
+    allow(subject).to receive(:layout).and_return(layout)
+  end
 
-  describe "#lean_forward" do
-    context "when the last cell " do
-      it "" do
-        expect(subject.lean_forward(2, 2, "|x|")).to be_nil
-      end
-
-      it "" do
-        expect(subject.lean_forward(1, 1, "|o|")).to eq(true)
-      end
+  context "with a turn that doesn't win the game " do
+    let(:turn) { Turn.new(1, 0, "x") }
+    it "returns nil" do
+        expect(subject.board_completed?(turn)).to eq(false)
     end
   end
 
-  describe "#up_right" do
-    context "when the last cell " do
-      it "" do
-        expect(subject.up_right(1, 1, "|x|")).to be(false)
-      end
+  context "with a turn that wins the game " do
+    let(:turn) { Turn.new(1, 1, "o") }
+    it "it returns true" do
+      expect(subject.board_completed?(turn)).to eq(true)
+    end
+  end
+end
 
-      it "" do
-        expect(subject.up_right(0, 2, "|o|")).to eq(true)
-      end
+describe Grid do
+  describe "#board_completed?" do
+    context "diagnol forward" do
+      let(:layout) {
+        [
+          [Cell.new, Cell.new, oh],
+          [Cell.new, oh,       ex],
+          [oh      , ex,       ex],
+        ]  
+      }
+    
+      it_behaves_like "completed_board"
+    end
+
+    context "diagnol backword" do
+      let(:layout) {
+        [
+          [oh,       Cell.new, ex],
+          [Cell.new, oh,       ex],
+          [ex      , ex,       oh],
+        ]
+     }
+     it_behaves_like "completed_board"
+   
+    end
+
+    context "vertical" do
+      let(:layout) {
+        [
+          [oh,       oh, ex      ],
+          [Cell.new, oh, ex      ],
+          [ex      , oh, Cell.new],
+        ]  
+     }
+     it_behaves_like "completed_board"
+    end
+
+    context "horizontal" do
+      let(:turn) { Turn.new(0, 2, "o") }
+      let(:layout) {
+        [
+          [oh,       oh, oh      ],
+          [Cell.new, oh, ex      ],
+          [ex      , oh, Cell.new],
+        ]  
+     }
+     it_behaves_like "completed_board"
     end
   end
 end

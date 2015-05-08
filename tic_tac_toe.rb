@@ -17,4 +17,4 @@ game = Game.new(user_piece, grid_size.to_i)
 
 game.start_game
 
-puts "Thank you"
+puts "Thank you for playing"

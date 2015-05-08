@@ -6,7 +6,7 @@ class Cell
   end
 
   def mark(space)
-    @space = space
+    self.space = space
   end
 
   def marked?

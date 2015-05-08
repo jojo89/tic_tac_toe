@@ -1,5 +1,5 @@
 class Turn
-  attr_accessor :column, :row, :character, :succesful
+  attr_accessor :column, :row, :character, :successful
   def initialize(column, row, character)
     @column = column
     @row = row
@@ -8,10 +8,10 @@ class Turn
   end
 
   def successful?
-    @successful
+    successful
   end
-  
+
   def was_successful
-    @successful = true
+    self.successful = true
   end
 end

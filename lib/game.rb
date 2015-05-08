@@ -3,25 +3,42 @@ require_relative 'turn.rb'
 require 'pry'
 
 class Game
-  attr_accessor :grid_size, :grid, :finished, :user_piece, :current_player
-
   def initialize(user_piece, grid_size)
-    @grid_size = grid_size
     @grid = Grid.new(grid_size)
     @user_piece = user_piece
     @current_player = ["o", "x"].sample
-    @finished = false
   end
 
-  def display_board
-    grid.display_board
+  def start_game
+    turn = nil
+    until turn && finished?(turn)
+      if user_piece == current_player
+        turn = generate_user_turn
+      else
+        turn = generate_computer_turn
+      end
+      until turn.successful?
+        grid.mark(turn)
+      end
+      display_grid
+      change_player
+    end
   end
 
-  def finished?
-    finished
+  private
+
+  attr_accessor :grid, :current_player
+  attr_reader :user_piece
+
+  def display_grid
+    grid.display
   end
 
-  def change_turn
+  def grid_size
+    grid.layout.length
+  end
+
+  def change_player
     self.current_player = ["x","o"].reject {|e| e == current_player}.first
   end
 
@@ -32,7 +49,7 @@ class Game
       x = gets.chomp.to_i
       puts "enter the cordinate of the y axis you would like to place your spot."
       y = gets.chomp.to_i
-      validated = validate_turn(x, y)
+      validated = validate_cordinates(x, y)
     end
     Turn.new(x - 1, grid_size - y, current_player)
   end
@@ -42,16 +59,16 @@ class Game
     until validated
       x = rand(1..grid_size.to_i)
       y = rand(1..grid_size.to_i)
-      validated = validate_turn(x, y)
+      validated = validate_cordinates(x, y)
     end
     Turn.new(x - 1, grid_size - y, current_player)
   end
   
-  def validate_turn(x, y)
+  def validate_cordinates(x, y)
     if !x.to_i.between?(1, grid_size.to_i) || !y.to_i.between?(1, grid_size.to_i)
       puts "Invalid Cordinates"
       return false
-    elsif grid.grid[grid_size - y][x - 1].marked?
+    elsif grid.layout[grid_size - y][x - 1].marked?
       puts "That spot has already been selected"
       return false
     else
@@ -60,22 +77,7 @@ class Game
   end
 
   def finished?(turn)
-    grid.check_board?(turn)
-  end
-
-  def start_game
-    turn = nil
-    until turn && grid.board_completed?(turn)
-      if user_piece == current_player
-        turn = generate_user_turn
-      else
-        turn = generate_computer_turn
-      end
-      until turn.successful?
-        grid.mark(turn)
-      end
-      change_turn
-    end
+    grid.board_completed?(turn)
   end
 end
 
