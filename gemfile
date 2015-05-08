@@ -1,2 +1,8 @@
+source 'https://rubygems.org'
 gem 'rspec'
 gem 'pry'
+gem 'ruby-try'
+gem 'guard-rspec', '~> 4.2.10'
+gem 'rspec-collection_matchers'
+gem 'rspec-mocks'
+
