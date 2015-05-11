@@ -1,5 +1,5 @@
 require_relative 'cell.rb'
-require_relative 'grid_analyzer.rb'
+require_relative 'layout_analyzer.rb'
 require 'pry'
 
 class Grid
@@ -65,6 +65,6 @@ class Grid
   end
 
   def grid_analyzer
-    GridAnalyzer.new(layout)
+    LayoutAnalyzer.new(layout)
   end
 end

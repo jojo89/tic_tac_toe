@@ -55,13 +55,7 @@ class Game
   end
 
   def generate_computer_turn
-    validated = nil
-    until validated
-      x = rand(1..grid_size.to_i)
-      y = rand(1..grid_size.to_i)
-      validated = validate_cordinates(x, y)
-    end
-    Turn.new(x - 1, grid_size - y, current_player)
+    LayoutAnalyzer.new(grid.layout).create_turn(current_player)
   end
   
   def validate_cordinates(x, y)
