@@ -1,6 +1,6 @@
 require_relative 'cell.rb'
+require_relative 'grid_analyzer.rb'
 require 'pry'
-require 'ruby-try'
 
 class Grid
   attr_reader :layout
@@ -14,7 +14,7 @@ class Grid
   def board_completed?(turn)
     if game_won?(turn)
       puts "#{turn.character}'s wins" 
-    elsif square_count == squares_occupied
+    elsif cats_game?
       puts "cats game!"
     else
       return false
@@ -55,60 +55,16 @@ class Grid
     end
     @layout = rows
   end
-
-  def straight_up(turn)
-    turn.row - 2 >= 0 && layout[turn.row - 1] && layout[turn.row - 2] && (layout[turn.row - 1][turn.column].try(:space) == turn.character && layout[turn.row - 2][turn.column].try(:space) == turn.character)
-  end
-
-  def straight_left(turn)
-    turn.column - 2 >= 0 && layout[turn.row] && layout[turn.row] && (layout[turn.row][turn.column - 1].try(:space) == turn.character && layout[turn.row][turn.column - 2].try(:space) == turn.character)
-  end
-
-  def down_right(turn)
-    layout[turn.row + 1] && layout[turn.row + 2] && (layout[turn.row + 1][turn.column + 1].try(:space) == turn.character && layout[turn.row + 2][turn.column + 2].try(:space) == turn.character)
-  end
-
-  def down_left(turn)
-    turn.column - 2 >= 0 && layout[turn.row + 1] && layout[turn.row + 2] && (layout[turn.row + 1][turn.column - 1].try(:space) == turn.character && layout[turn.row + 2][turn.column - 2].try(:space) == turn.character)
-  end
-
-  def up_right(turn)
-    turn.row - 2 >= 0 && layout[turn.row - 1] && layout[turn.row - 2] && (layout[turn.row - 1][turn.column + 1].try(:space) == turn.character && layout[turn.row - 2][turn.column + 2].try(:space) == turn.character)
-  end
-
-  def up_left(turn)
-    turn.row - 2 >= 0 && turn.column - 2 >= 0 && layout[turn.row - 1] && layout[turn.row - 2] && (layout[turn.row - 1][turn.column - 1].try(:space) == turn.character && layout[turn.row - 2][turn.column - 2].try(:space) == turn.character)
-  end
-
-  def horizontal(turn)
-    turn.column != 0 && layout[turn.row] && layout[turn.row] && (layout[turn.row][turn.column + 1].try(:space) == turn.character && layout[turn.row][turn.column - 1].try(:space) == turn.character)
-  end
-
-  def lean_forward(turn)
-    turn.column != 0 && turn.row != 0 && layout[turn.row] && layout[turn.row + 1] && (layout[turn.row - 1][turn.column + 1].try(:space) == turn.character && layout[turn.row + 1][turn.column - 1].try(:space) == turn.character)
-  end
-
-  def lean_backward(turn)
-    turn.column != 0 && turn.row != 0 && layout[turn.row] && layout[turn.row + 1] && (layout[turn.row - 1][turn.column - 1].try(:space) == turn.character && layout[turn.row + 1][turn.column + 1].try(:space) == turn.character)
-  end
-
-  def vertical(turn)
-    turn.row != 0 && layout[turn.row + 1] && layout[turn.row - 1] && (layout[turn.row + 1][turn.column].try(:space) == turn.character && layout[turn.row - 1][turn.column].try(:space) == turn.character)
-  end
-
-  def straight_right(turn)
-    layout[turn.row] && layout[turn.row] && (layout[turn.row][turn.column + 1].try(:space) == turn.character && layout[turn.row][turn.column + 2].try(:space) == turn.character)
-  end
-
-  def straight_down(turn)
-    layout[turn.row + 1] && layout[turn.row + 2] && (layout[turn.row + 1][turn.column].try(:space) == turn.character && layout[turn.row + 2][turn.column].try(:space) == turn.character)
+  
+  def cats_game?
+    square_count == squares_occupied
   end
 
   def game_won?(turn)
-    lean_backward(turn) || lean_forward(turn) ||
-    horizontal(turn) || vertical(turn) || up_left(turn) || 
-    straight_down(turn) || straight_right(turn) || 
-    straight_left(turn) || straight_up(turn) || 
-    down_right(turn) || down_left(turn) || up_right(turn)
+    grid_analyzer.three_in_a_row?(turn)
+  end
+
+  def grid_analyzer
+    GridAnalyzer.new(layout)
   end
 end
