@@ -11,9 +11,8 @@ class Grid
     @squares_occupied = 0
   end
 
-  def board_completed?(turn)
-    if game_won?(turn)
-      puts "#{turn.character}'s wins" 
+  def board_completed?(row, column)
+    if game_won?(row, column)
     elsif cats_game?
       puts "cats game!"
     else
@@ -46,9 +45,9 @@ class Grid
 
   def make_layout(size)
     rows = []
-    size.times do |x|
+    size.times do
       cells = []
-      size.times do |xx|
+      size.times do
         cells << Cell.new
       end
       rows << cells
@@ -60,8 +59,8 @@ class Grid
     square_count == squares_occupied
   end
 
-  def game_won?(turn)
-    grid_analyzer.three_in_a_row?(turn)
+  def game_won?(row, column)
+    grid_analyzer.three_in_a_row?(row, column)
   end
 
   def grid_analyzer

@@ -10,21 +10,19 @@ RSpec.shared_examples "completed_board" do
   end
 
   context "with a turn that doesn't win the game " do
-    let(:turn) { Turn.new(1, 0, "x") }
     it "returns nil" do
-        expect(subject.board_completed?(turn)).to eq(false)
+      expect(subject.three_in_a_row?(1, 2)).to eq(false)
     end
   end
 
   context "with a turn that wins the game " do
-    let(:turn) { Turn.new(1, 1, "o") }
     it "it returns true" do
-      expect(subject.board_completed?(turn)).to eq(true)
+      expect(subject.three_in_a_row?(1, 1)).to eq(true)
     end
   end
 end
 
-describe Grid do
+describe LayoutAnalyzer do
   describe "#board_completed?" do
     context "diagnol forward" do
       let(:layout) {

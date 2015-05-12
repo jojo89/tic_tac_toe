@@ -11,7 +11,7 @@ class Game
 
   def start_game
     turn = nil
-    until turn && finished?(turn)
+    until turn && finished?(turn.row, turn.column)
       if user_piece == current_player
         turn = generate_user_turn
       else
@@ -42,6 +42,10 @@ class Game
     self.current_player = ["x","o"].reject {|e| e == current_player}.first
   end
 
+  def opposing_player
+    ["x","o"].reject {|e| e == current_player}.first
+  end
+
   def generate_user_turn
     validated = nil
     until validated
@@ -70,8 +74,8 @@ class Game
     end
   end
 
-  def finished?(turn)
-    grid.board_completed?(turn)
+  def finished?(row, column)
+    grid.board_completed?(row, column)
   end
 end
 

@@ -2,7 +2,7 @@ require 'ruby-try'
 require 'pry'
 
 class LayoutAnalyzer
-  attr_reader :layout, :last_turn
+  attr_reader :layout, :row, :column
 
   def initialize(layout)
     @layout = layout
@@ -14,15 +14,18 @@ class LayoutAnalyzer
       row.each_with_index do |cell, column_index|
         turn = Turn.new(column_index, row_index, character)
         next if cell.marked?
-        best_turn = turn if !best_turn
-        best_turn = turn if three_in_a_row?(turn)
+        best_turn = turn
+        if three_in_a_row?(row_index, column_index)
+          puts "#{character}'s wins" 
+          return turn
+        end 
       end
     end
     best_turn
   end
 
-  def three_in_a_row?(turn)
-    set_last_last_turn(turn)
+  def three_in_a_row?(row, column)
+    set_last_last_turn(row, column)
     lean_backward || lean_forward ||
     horizontal || vertical || up_left || 
     straight_down || straight_right || 
@@ -32,52 +35,57 @@ class LayoutAnalyzer
 
   private
 
-  def set_last_last_turn(last_turn)
-    @last_turn = last_turn
+  def turn_cell
+    layout[row][column].space
+  end
+
+  def set_last_last_turn(row, column)
+    @row = row
+    @column = column
   end
 
   def two_rows_up?
-    last_turn.row - 2 >= 0
+    row - 2 >= 0
   end
   
   def one_row_up
-    layout[last_turn.row - 1]
+    layout[row - 1]
   end
   
   def one_column_lower
-    last_turn.column + 1
+    column + 1
   end
   
   def two_rows_up
-    layout[last_turn.row - 2]
+    layout[row - 2]
   end
   
   def two_columns_left?
-    last_turn.column - 2 >= 0
+    column - 2 >= 0
   end
 
   def one_column_left?
-    last_turn.column != 0
+    column != 0
   end
 
   def one_row_up?
-    last_turn.row != 0
+    row != 0
   end
 
   def one_row_lower
-    layout[last_turn.row + 1]
+    layout[row + 1]
   end
 
   def two_rows_lower
-    layout[last_turn.row + 2]
+    layout[row + 2]
   end
   
   def at_one_column_right
-    layout[last_turn.row][one_column_lower].try(:space)
+    layout[row][one_column_lower].try(:space)
   end
 
   def at_two_columns_right
-    layout[last_turn.row][last_turn.column + 2].try(:space)
+    layout[row][column + 2].try(:space)
   end
   
   def at_one_row_lower_and_one_column_right
@@ -85,23 +93,23 @@ class LayoutAnalyzer
   end
   
   def at_one_row_lower_and_one_column_left
-    one_row_lower[last_turn.column - 1].try(:space)
+    one_row_lower[column - 1].try(:space)
   end
   
   def at_one_row_up
-    one_row_up[last_turn.column].try(:space)
+    one_row_up[column].try(:space)
   end
   
   def at_two_rows_up
-    two_rows_up[last_turn.column].try(:space)
+    two_rows_up[column].try(:space)
   end
   
   def at_two_rows_lower_and_two_columns_left
-    two_rows_lower[last_turn.column - 2].try(:space)
+    two_rows_lower[column - 2].try(:space)
   end
 
   def at_one_column_left
-    layout[last_turn.row][last_turn.column - 1].try(:space)
+    layout[row][column - 1].try(:space)
   end
   
   def at_one_row_up_and_one_column_lower
@@ -109,89 +117,94 @@ class LayoutAnalyzer
   end
   
   def at_two_rows_up_and_two_columns_up
-    two_rows_up[last_turn.column - 2].try(:space)
+    two_rows_up[column - 2].try(:space)
   end
 
   def at_one_row_lower
-    one_row_lower[last_turn.column].try(:space)
+    one_row_lower[column].try(:space)
   end
 
   def at_one_row_up_and_one_column_left
-    one_row_up[last_turn.column - 1].try(:space)
+    one_row_up[column - 1].try(:space)
   end
 
   def at_two_rows_up_and_two_columns_right
-    two_rows_up[last_turn.column + 2].try(:space)
+    two_rows_up[column + 2].try(:space)
   end
 
   def at_two_rows_lower_and_two_columns_right
-    two_rows_lower[last_turn.column + 2].try(:space)
+    two_rows_lower[column + 2].try(:space)
   end
   
   def at_two_columns_left
-    layout[last_turn.row][last_turn.column - 2].try(:space)
+    layout[row][column - 2].try(:space)
   end
   
   def at_two_rows_lower
-    two_rows_lower[last_turn.column].try(:space)
+    two_rows_lower[column].try(:space)
   end
 
   def straight_up
     two_rows_up? && one_row_up && two_rows_up && 
-    (at_one_row_up == last_turn.character && at_two_rows_up == last_turn.character)
+    [at_one_row_up, turn_cell, at_two_rows_up].uniq.length == 1
   end
 
   def straight_left
-    two_columns_left? && layout[last_turn.row] && layout[last_turn.row] &&
-    (at_one_column_left == last_turn.character && at_two_columns_left == last_turn.character)
+    two_columns_left? && layout[row] && layout[row] &&
+    [at_one_column_left, turn_cell, at_two_columns_left].uniq.length == 1
   end
 
   def down_right
     one_row_lower && two_rows_lower &&
-    (at_one_row_lower_and_one_column_right == last_turn.character && at_two_rows_lower_and_two_columns_right == last_turn.character)
+    [at_one_row_lower_and_one_column_right, turn_cell, at_two_rows_lower_and_two_columns_right].uniq.length == 1
   end
 
   def down_left
     two_columns_left? && one_row_lower && two_rows_lower &&
-    (at_one_row_lower_and_one_column_left == last_turn.character && at_two_rows_lower_and_two_columns_left == last_turn.character)
+    [at_one_row_lower_and_one_column_left, turn_cell, at_two_rows_lower_and_two_columns_left].uniq.length == 1
+  
   end
 
   def up_right
     two_rows_up? && one_row_up && two_rows_up &&
-    (at_one_row_up_and_one_column_lower == last_turn.character && at_two_rows_up_and_two_columns_right == last_turn.character)
+    [at_one_row_up_and_one_column_lower, turn_cell, at_two_rows_up_and_two_columns_right].uniq.length == 1
+  
   end
 
   def up_left
     two_rows_up? && two_columns_left? && one_row_up && two_rows_up &&
-    (at_one_row_up_and_one_column_left == last_turn.character && at_two_rows_up_and_two_columns_up == last_turn.character)
+    [at_one_row_up_and_one_column_left, turn_cell, at_two_rows_up_and_two_columns_up].uniq.length == 1
+  
   end
 
   def horizontal
     one_column_left? &&
-    (at_one_column_right == last_turn.character && at_one_column_left == last_turn.character)
+    [at_one_column_right, turn_cell, at_one_column_left].uniq.length == 1
+  
   end
 
   def lean_forward
     one_column_left? && one_row_up? && one_row_lower &&
-    (at_one_row_up_and_one_column_lower == last_turn.character && at_one_row_lower_and_one_column_left == last_turn.character)
+    [at_one_row_up_and_one_column_lower, turn_cell, at_one_row_lower_and_one_column_left].uniq.length == 1
+  
   end
 
   def lean_backward
     one_column_left? && one_row_up? && one_row_lower &&
-    (at_one_row_up_and_one_column_left == last_turn.character && at_one_row_lower_and_one_column_right == last_turn.character)
+    [at_one_row_up_and_one_column_left, turn_cell, at_one_row_lower_and_one_column_right].uniq.length == 1
   end
 
   def vertical
     one_row_up? && one_row_lower && one_row_up &&
-    (at_one_row_lower == last_turn.character && at_one_row_up == last_turn.character)
+    [at_one_row_lower, turn_cell, at_one_row_up].uniq.length == 1
   end
 
   def straight_right
-     at_one_column_right == last_turn.character && at_two_columns_right == last_turn.character
+    [at_one_column_right, turn_cell, at_two_columns_right].uniq.length == 1
   end
 
   def straight_down
     one_row_lower && two_rows_lower &&
-    (at_one_row_lower == last_turn.character && at_two_rows_lower == last_turn.character)
+    [at_one_row_lower, turn_cell, at_two_rows_lower].uniq.length == 1
   end
 end
