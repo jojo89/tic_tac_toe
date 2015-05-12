@@ -14,11 +14,9 @@ class LayoutAnalyzer
       row.each_with_index do |cell, column_index|
         turn = Turn.new(column_index, row_index, character)
         next if cell.marked?
-        best_turn = turn
-        if three_in_a_row?(row_index, column_index)
-          puts "#{character}'s wins" 
-          return turn
-        end 
+        best_turn = turn unless best_turn
+        best_turn = turn if connectable_spot(row_index, column_index, character)
+        return turn if winnable_set(row_index, column_index)
       end
     end
     best_turn
@@ -26,14 +24,39 @@ class LayoutAnalyzer
 
   def three_in_a_row?(row, column)
     set_last_last_turn(row, column)
-    lean_backward || lean_forward ||
-    horizontal || vertical || up_left || 
-    straight_down || straight_right || 
-    straight_left || straight_up || 
-    down_right || down_left || up_right
+    winning_combinations.any?{ |set| 
+      next unless set
+      set.uniq.length == 1 
+    }
   end
 
   private
+
+  def winnable_set(row, column)
+    set_last_last_turn(row, column)
+    winning_combinations.any?{ |set| 
+      next unless set
+      pieces = set.reject { |space| space == "| |" || space == nil }
+      pieces.length == 2 && pieces.uniq.length == 1
+    }
+  end
+
+  def connectable_spot(row, column, character)
+    set_last_last_turn(row, column)
+    winning_combinations.any?{ |set| 
+      next unless set
+      pieces = set.reject { |space| space == "| |" || space == nil }
+      pieces.uniq.first == character
+    }
+  end
+
+  def winning_combinations
+    [lean_backward, lean_forward, 
+    horizontal, vertical, up_left,
+    straight_down, straight_right, 
+    straight_left, straight_up,
+    down_right, down_left, up_right]
+  end
 
   def turn_cell
     layout[row][column].space
@@ -146,65 +169,65 @@ class LayoutAnalyzer
 
   def straight_up
     two_rows_up? && one_row_up && two_rows_up && 
-    [at_one_row_up, turn_cell, at_two_rows_up].uniq.length == 1
+    [at_one_row_up, turn_cell, at_two_rows_up]
   end
 
   def straight_left
     two_columns_left? && layout[row] && layout[row] &&
-    [at_one_column_left, turn_cell, at_two_columns_left].uniq.length == 1
+    [at_one_column_left, turn_cell, at_two_columns_left]
   end
 
   def down_right
     one_row_lower && two_rows_lower &&
-    [at_one_row_lower_and_one_column_right, turn_cell, at_two_rows_lower_and_two_columns_right].uniq.length == 1
+    [at_one_row_lower_and_one_column_right, turn_cell, at_two_rows_lower_and_two_columns_right]
   end
 
   def down_left
     two_columns_left? && one_row_lower && two_rows_lower &&
-    [at_one_row_lower_and_one_column_left, turn_cell, at_two_rows_lower_and_two_columns_left].uniq.length == 1
+    [at_one_row_lower_and_one_column_left, turn_cell, at_two_rows_lower_and_two_columns_left]
   
   end
 
   def up_right
     two_rows_up? && one_row_up && two_rows_up &&
-    [at_one_row_up_and_one_column_lower, turn_cell, at_two_rows_up_and_two_columns_right].uniq.length == 1
+    [at_one_row_up_and_one_column_lower, turn_cell, at_two_rows_up_and_two_columns_right]
   
   end
 
   def up_left
     two_rows_up? && two_columns_left? && one_row_up && two_rows_up &&
-    [at_one_row_up_and_one_column_left, turn_cell, at_two_rows_up_and_two_columns_up].uniq.length == 1
+    [at_one_row_up_and_one_column_left, turn_cell, at_two_rows_up_and_two_columns_up]
   
   end
 
   def horizontal
     one_column_left? &&
-    [at_one_column_right, turn_cell, at_one_column_left].uniq.length == 1
+    [at_one_column_right, turn_cell, at_one_column_left]
   
   end
 
   def lean_forward
     one_column_left? && one_row_up? && one_row_lower &&
-    [at_one_row_up_and_one_column_lower, turn_cell, at_one_row_lower_and_one_column_left].uniq.length == 1
+    [at_one_row_up_and_one_column_lower, turn_cell, at_one_row_lower_and_one_column_left]
   
   end
 
   def lean_backward
     one_column_left? && one_row_up? && one_row_lower &&
-    [at_one_row_up_and_one_column_left, turn_cell, at_one_row_lower_and_one_column_right].uniq.length == 1
+    [at_one_row_up_and_one_column_left, turn_cell, at_one_row_lower_and_one_column_right]
   end
 
   def vertical
     one_row_up? && one_row_lower && one_row_up &&
-    [at_one_row_lower, turn_cell, at_one_row_up].uniq.length == 1
+    [at_one_row_lower, turn_cell, at_one_row_up]
   end
 
   def straight_right
-    [at_one_column_right, turn_cell, at_two_columns_right].uniq.length == 1
+    [turn_cell, at_one_column_right, at_two_columns_right]
   end
 
   def straight_down
     one_row_lower && two_rows_lower &&
-    [at_one_row_lower, turn_cell, at_two_rows_lower].uniq.length == 1
+    [at_one_row_lower, turn_cell, at_two_rows_lower]
   end
 end

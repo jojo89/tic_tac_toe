@@ -1,10 +1,6 @@
 require 'spec_helper.rb'
 
 RSpec.shared_examples "completed_board" do
-  subject { described_class.new(3) }
-  let(:ex) { cell = Cell.new; cell.mark("|x|") ; cell}
-  let(:oh) { cell = Cell.new; cell.mark("|o|") ; cell}
-
   before do
     allow(subject).to receive(:layout).and_return(layout)
   end
@@ -23,6 +19,47 @@ RSpec.shared_examples "completed_board" do
 end
 
 describe LayoutAnalyzer do
+  subject { described_class.new(3) }
+  let(:ex) { cell = Cell.new; cell.mark("|x|") ; cell}
+  let(:oh) { cell = Cell.new; cell.mark("|o|") ; cell}
+
+  before do
+    allow(subject).to receive(:layout).and_return(layout)
+  end
+
+  describe "#create_turn?" do
+
+    context "when the opposing team has a potential win" do
+      let(:layout) {
+        [
+          [Cell.new, Cell.new, oh],
+          [Cell.new, Cell.new, ex],
+          [oh      , ex,       ex],
+        ]  
+      }
+
+      it "returns a blocking turn" do
+        expect(subject.create_turn("x").row).to eq(1)
+        expect(subject.create_turn("x").column).to eq(1)
+      end
+    end
+
+    context "when team has a potential win" do
+      let(:layout) {
+        [
+          [oh,       Cell.new, Cell.new],
+          [Cell.new, ex,       ex],
+          [oh      , Cell.new, ex],
+        ]  
+      }
+
+      it "returns a winning turn" do
+        expect(subject.create_turn("x").row).to eq(0)
+        expect(subject.create_turn("x").column).to eq(2)
+      end
+    end
+  end
+  
   describe "#board_completed?" do
     context "diagnol forward" do
       let(:layout) {

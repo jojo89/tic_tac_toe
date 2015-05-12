@@ -13,7 +13,7 @@ describe Grid do
       end
 
       it "returns true" do
-        expect(subject.board_completed?(nil, nil)).to eq(true)
+        expect(subject.board_completed?(nil, nil, nil)).to eq(true)
       end
     end
 
@@ -31,7 +31,7 @@ describe Grid do
       end
 
       it "returns true" do
-        expect(subject.board_completed?(1, 1)).to eq(true)
+        expect(subject.board_completed?(1, 1, "o")).to eq(true)
       end
     end
 
@@ -49,7 +49,7 @@ describe Grid do
       end
 
       it "returns true" do
-        expect(subject.board_completed?(1, 1)).to eq(false)
+        expect(subject.board_completed?(1, 1, "x")).to eq(false)
       end
     end
   end
@@ -76,7 +76,7 @@ describe Grid do
         subject.mark(second_turn)
       end
 
-      it "doesn't marks the coordinates of the passed turn" do
+      it "doesn't mark the coordinates of the passed turn" do
         expect(layout[1][1].space).to eq("|x|")
       end
     end

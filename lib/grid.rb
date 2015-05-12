@@ -11,8 +11,9 @@ class Grid
     @squares_occupied = 0
   end
 
-  def board_completed?(row, column)
+  def board_completed?(row, column, character)
     if game_won?(row, column)
+      puts "#{character}'s wins" 
     elsif cats_game?
       puts "cats game!"
     else

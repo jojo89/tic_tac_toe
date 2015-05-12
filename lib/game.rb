@@ -12,6 +12,7 @@ class Game
   def start_game
     turn = nil
     until turn && finished?(turn.row, turn.column)
+      change_player
       if user_piece == current_player
         turn = generate_user_turn
       else
@@ -21,7 +22,6 @@ class Game
         grid.mark(turn)
       end
       display_grid
-      change_player
     end
   end
 
@@ -75,7 +75,7 @@ class Game
   end
 
   def finished?(row, column)
-    grid.board_completed?(row, column)
+    grid.board_completed?(row, column, current_player)
   end
 end
 
