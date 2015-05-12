@@ -13,11 +13,18 @@ class LayoutAnalyzer
     layout.each_with_index do |row, row_index|
       row.each_with_index do |cell, column_index|
         turn = Turn.new(column_index, row_index, character)
-        next if cell.marked?
-        best_turns << turn if best_turns.empty?
-        best_turns << turn if connectable_spot(row_index, column_index, character)
-        best_turns.unshift(turn) if !winnable_sets(row_index, column_index).empty?
-        return turn if winnable_sets(row_index, column_index).any? { |set| set.include?("|#{character}|") }
+        winnable_sets = winnable_sets(row_index, column_index)
+        if cell.marked?
+          next
+        elsif winnable_sets.any? { |set| set.include?("|#{character}|") }
+          return turn
+        elsif !winnable_sets.empty?
+          best_turns.unshift(turn)
+        elsif connectable_spot(row_index, column_index, character)
+          best_turns << turn
+        elsif best_turns.empty? 
+          best_turns << turn 
+        end
       end
     end
     best_turns.first
