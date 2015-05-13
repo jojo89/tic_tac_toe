@@ -32,10 +32,11 @@ class Grid
     if cell.marked?
       puts "\n\n\n"
       puts "That spot has already been selected"
+      false
     else
       cell.mark(turn.character)
-      turn.was_successful
       self.squares_occupied +=   1
+      true
     end
   end
 

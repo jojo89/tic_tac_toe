@@ -9,7 +9,8 @@ class LayoutAnalyzer
   end
 
   def create_turn(character)
-    best_turns = []
+    blocking_turns = []
+    sequence_building_turns = []
     layout.each_with_index do |row, row_index|
       row.each_with_index do |cell, column_index|
         turn = Turn.new(column_index, row_index, character)
@@ -19,15 +20,13 @@ class LayoutAnalyzer
         elsif winnable_sets.any? { |set| set.include?("|#{character}|") }
           return turn
         elsif !winnable_sets.empty?
-          best_turns.unshift(turn)
-        elsif connectable_spot(row_index, column_index, character)
-          best_turns << turn
-        elsif best_turns.empty? 
-          best_turns << turn 
+          blocking_turns << turn
+        elsif connectable_spot(row_index, column_index, character) || blocking_turns.empty? 
+          sequence_building_turns.unshift(turn)
         end
       end
     end
-    best_turns.first
+    blocking_turns.first || sequence_building_turns.first
   end
 
   def three_in_a_row?(row, column)
@@ -54,7 +53,7 @@ class LayoutAnalyzer
     winning_combinations.any?{ |set| 
       next unless set
       pieces = set.reject { |space| space == "| |" || space == nil }
-      pieces.uniq.first == character
+      pieces.uniq.first == "|#{character}|"
     }
   end
 

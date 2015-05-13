@@ -18,8 +18,7 @@ class Game
       else
         turn = generate_computer_turn
       end
-      until turn.successful?
-        grid.mark(turn)
+      until grid.mark(turn)
       end
       display_grid
     end
